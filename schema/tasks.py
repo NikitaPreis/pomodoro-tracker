@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field, model_validator
 
 
 class TaskSchema(BaseModel):
-    id: int | None = None
+    id: int | None = None 
     name: str | None = None
     pomodoro_count: int | None = None
     category_id: int
