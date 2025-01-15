@@ -1,18 +1,14 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from typing import Any
 
-from settings import settings
-
-
-engine = create_engine(
-    f'postgresql+psycopg2://{settings.POSTGRES_USER}:'
-    f'{settings.POSTGRES_PASSWORD}@localhost:'
-    f'{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}'
-)
+from sqlalchemy.orm import DeclarativeBase, declared_attr
 
 
-Session = sessionmaker(engine)
+class Base(DeclarativeBase):
+    id: Any
+    __name__: str
 
+    __allow_unmapped__ = True
 
-def get_db_session():
-    return Session
+    @declared_attr
+    def __tablename__(self) -> str:
+        return self.__name__.lower()
