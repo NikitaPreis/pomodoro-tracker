@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sqlalchemy.orm import Mapped, mapped_column
 
 from database import Base
@@ -13,4 +15,3 @@ class UserProfile(Base):
         nullable=False, unique=True
     )
     password: Mapped[str] = mapped_column(nullable=False, unique=True)
-    access_token: Mapped[str] = mapped_column(nullable=False, unique=True)

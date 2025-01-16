@@ -16,7 +16,8 @@ dependencies = [
     "alembic (>=1.14.0,<2.0.0)",
     "psycopg2 (>=2.9.10,<3.0.0)",
     "psycopg2-binary (>=2.9.10,<3.0.0)",
-    "redis (>=5.2.1,<6.0.0)"
+    "redis (>=5.2.1,<6.0.0)",
+    "python-jose[cryptograthy] (>=3.3.0,<4.0.0)"
 ]
 
 

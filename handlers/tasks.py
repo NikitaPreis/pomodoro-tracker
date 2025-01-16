@@ -1,11 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 
-from dependecy import get_task_service, get_cache_tasks_repository, get_tasks_repository
+from exception import TaskNotFoundException, UserNotFoundException
+from dependecy import get_task_service, get_cache_tasks_repository, get_tasks_repository, get_request_user_id
 from repository import TaskRepository, TaskCache
 from service import TaskService
-from schema.tasks import TaskSchema
+from schema.tasks import TaskSchema, TaskCreateSchema
 
 
 router = APIRouter(
@@ -19,9 +20,10 @@ router = APIRouter(
         response_model=list[TaskSchema]
 )
 async def get_tasks(
-    task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)],
+    task_service: Annotated[TaskService, Depends(get_task_service)],
+    user_id: int = Depends(get_request_user_id)
 ):
-    tasks = task_repository.get_tasks()
+    tasks = task_service.get_tasks(user_id=user_id)
     return tasks
 
 
@@ -31,9 +33,23 @@ async def get_tasks(
 )
 async def get_task(
     task_id: int,
-    task_service: Annotated[TaskService, Depends(get_task_service)]
+    task_service: Annotated[TaskService, Depends(get_task_service)],
+    user_id: int = Depends(get_request_user_id)
 ):
-    return task_service.get_task(task_id=task_id)
+    try:
+        return task_service.get_task(
+            task_id=task_id, user_id = user_id
+        )
+    except TaskNotFoundException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.detail
+        )
+    except UserNotFoundException as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=e.detail
+        )
 
 
 @router.post(
@@ -41,11 +57,11 @@ async def get_task(
         response_model=TaskSchema
 )
 async def create_task(
-    task: TaskSchema,
-    task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)]
+    body: TaskCreateSchema,
+    task_service: Annotated[TaskService, Depends(get_task_service)],
+    user_id: int = Depends(get_request_user_id)
 ) -> TaskSchema:
-    task_id = task_repository.create_task(task)
-    task.id = task_id
+    task = task_service.create_task(body=body, user_id=user_id)
     return task
 
 
@@ -56,9 +72,24 @@ async def create_task(
 )
 async def update_task_name(
     task_id: int, name: str,
-    task_serice: Annotated[TaskService, Depends(get_task_service)]
+    task_serice: Annotated[TaskService, Depends(get_task_service)],
+    user_id:int = Depends(get_request_user_id)
 ) -> TaskSchema:
-    return task_serice.update_task_name(task_id=task_id, name=name)
+    try:
+        task = task_serice.update_task_name(
+           task_id=task_id, name=name, user_id=user_id
+        )
+        return task
+    except TaskNotFoundException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.detail
+        )
+    except UserNotFoundException as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=e.detail
+        )
 
 
 @router.delete(
@@ -67,6 +98,31 @@ async def update_task_name(
 )
 async def delete_task(
     task_id: int,
-    task_service: Annotated[TaskService, Depends(get_task_service)]
+    task_service: Annotated[TaskService, Depends(get_task_service)],
+    user_id:int = Depends(get_request_user_id)
 ):
-    return task_service.delete_task(task_id=task_id)
+    try:
+        return task_service.delete_task(
+            task_id=task_id, user_id=user_id
+        )
+    except TaskNotFoundException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.detail
+        )
+    except UserNotFoundException as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=e.detail
+        )
+
+
+# @router.get(
+#         path='/{task_id}',
+#         response_model=TaskSchema
+# )
+# async def get_task(
+#     task_id: int,
+#     task_service: Annotated[TaskService, Depends(get_task_service)]
+# ):
+#     return task_service.get_task(task_id=task_id)
