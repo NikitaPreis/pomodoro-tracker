@@ -8,9 +8,12 @@ class Settings(BaseSettings):
     DB_NAME: str = 'pomodoro'
     DB_HOST: str = 'localhost'
     DB_PORT: int = 5432
-    CACHE_HOST: str = '0.0.0.0'
+    CACHE_HOST: str = '127.0.0.1'
     CACHE_PORT: int = 6379
     CACHE_DB: int = 0
+    JWT_SECRET_KEY: str = 'secret_key'
+    JWT_ENCODE_ALHORITHM: str = 'HS256'
+
 
     @property
     def db_url(self):

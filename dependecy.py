@@ -1,12 +1,14 @@
 from typing import Annotated
 
-from fastapi import Depends
+from fastapi import Depends, Request, security, Security, HTTPException
 from sqlalchemy.orm import Session
 
 from cache import get_redis_connection
 from database import get_db_session
+from exception import TokenExpired, TokenNotCorrect
 from repository import TaskRepository, TaskCache, UserRepository
 from service import AuthService, TaskService, UserService
+from settings import Settings
 
 
 def get_tasks_repository(
@@ -36,12 +38,40 @@ def get_user_repository(
     return UserRepository(db_session=db_session)
 
 
-def get_user_service(
-    user_repository: UserRepository = Depends(get_user_repository)
-) -> UserService:
-    return UserService(user_repository=user_repository)
-
 def get_auth_service(
-    user_repository: UserRepository = Depends(get_user_repository)
+    user_repository: UserRepository = Depends(get_user_repository),
 ) -> AuthService:
-    return AuthService(user_repository=user_repository)
+    return AuthService(
+        user_repository=user_repository, settings=Settings()
+    )
+
+
+def get_user_service(
+    user_repository: UserRepository = Depends(get_user_repository),
+    auth_service: AuthService = Depends(get_auth_service)
+) -> UserService:
+    return UserService(
+        user_repository=user_repository, auth_service=auth_service
+    )
+
+resuable_oauth2 = security.HTTPBearer()
+
+def get_request_user_id(
+    auth_service: AuthService = Depends(get_auth_service),
+    token: security.http.HTTPAuthorizationCredentials = Security(resuable_oauth2)
+) -> int:
+    try:
+        user_id = auth_service.get_user_id_from_access_token(
+            token.credentials
+        )
+    except TokenExpired as e:
+        raise HTTPException(
+            status_code=401,
+            detail=e.detail
+        )
+    except TokenNotCorrect as e:
+        raise HTTPException(
+            status_code=401,
+            detail=e.detail
+        )
+    return user_id
