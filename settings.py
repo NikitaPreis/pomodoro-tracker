@@ -2,6 +2,13 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    POSTGRES_DRIVER: str = 'postgresql+psycopg2'
+    POSTGRES_PASSWORD: str = 'mysecretpassword'
+    POSTGRES_USER: str = 'postgres_user'
+    POSTGRES_DB: str = 'pomodoro'
+    POSTGRES_HOST: str = 'localhost'
+    POSTGRES_PORT: int = 5432
+
     DB_DRIVER: str = 'postgresql+psycopg2'
     DB_PASSWORD: str = 'mysecretpassword'
     DB_USER: str = 'postgres_user'
