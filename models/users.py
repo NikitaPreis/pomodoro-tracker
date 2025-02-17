@@ -16,5 +16,6 @@ class UserProfile(Base):
     )
     password: Mapped[str] = mapped_column(nullable=True, unique=True)
     google_access_token: Mapped[Optional[str]]
+    yandex_access_token: Mapped[Optional[str]]
     email: Mapped[Optional[str]]
     name: Mapped[Optional[str]]
