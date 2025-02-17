@@ -17,7 +17,10 @@ dependencies = [
     "psycopg2 (>=2.9.10,<3.0.0)",
     "psycopg2-binary (>=2.9.10,<3.0.0)",
     "redis (>=5.2.1,<6.0.0)",
-    "python-jose[cryptograthy] (>=3.3.0,<4.0.0)"
+    "python-jose[cryptograthy] (>=3.3.0,<4.0.0)",
+    "requests (>=2.32.3,<3.0.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "pytest (>=8.3.4,<9.0.0)"
 ]
 
 
