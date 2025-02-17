@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str = 'localhost'
     POSTGRES_PORT: int = 5432
 
-    DB_DRIVER: str = 'postgresql+psycopg2'
+    DB_DRIVER: str = 'postgresql+asyncpg'
     DB_PASSWORD: str = 'mysecretpassword'
     DB_USER: str = 'postgres'
     DB_NAME: str = 'pomodoro'
