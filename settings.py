@@ -2,6 +2,13 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    POSTGRES_DRIVER: str = 'postgresql+psycopg2'
+    POSTGRES_PASSWORD: str = 'mysecretpassword'
+    POSTGRES_USER: str = 'postgres_user'
+    POSTGRES_DB: str = 'pomodoro'
+    POSTGRES_HOST: str = 'localhost'
+    POSTGRES_PORT: int = 5432
+
     DB_DRIVER: str = 'postgresql+psycopg2'
     DB_PASSWORD: str = 'mysecretpassword'
     DB_USER: str = 'postgres'
@@ -21,6 +28,11 @@ class Settings(BaseSettings):
     GOOGLE_REDIRECT_URI: str = ''
     GOOGLE_TOKEN_URL: str = 'https://accounts.google.com/o/oauth2/token'
 
+    YANDEX_CLIENT_ID: str = ''
+    YANDEX_CLIENT_SECRET: str = ''
+    YANDEX_REDIRECT_URI: str = ''
+    YANDEX_TOKEN_URL: str = 'https://oauth.yandex.ru/token'
+
 
     @property
     def db_url(self):
@@ -36,5 +48,11 @@ class Settings(BaseSettings):
                 f'?response_type=code&client_id={self.GOOGLE_CLIENT_ID}'
                 f'&redirect_uri={self.GOOGLE_REDIRECT_URI}'
                 f'&scope=openid%20profile%20email&access_type=offline')
+
+    @property
+    def yandex_redirect_url(self) -> str:
+        return (f'https://oauth.yandex.ru/authorize?response_type=code'
+                f'&client_id={self.YANDEX_CLIENT_ID}'
+                f'&redirect_uri={self.YANDEX_REDIRECT_URI}')
 
 settings = Settings()

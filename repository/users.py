@@ -42,12 +42,3 @@ class UserRepository:
         )
         with self.db_session() as session:
             return session.execute(query).scalar_one_or_none()
-
-    def get_google_user(self, google_token: str) -> UserProfile | None:
-        query = select(UserProfile).where(
-            UserProfile.google_access_token == google_token
-        )
-        with self.db_session() as session:
-            user = session.execute(query).scalar_one_or_none()
-            print(user)
-            return user
