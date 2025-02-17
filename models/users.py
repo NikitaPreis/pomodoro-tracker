@@ -12,9 +12,9 @@ class UserProfile(Base):
         primary_key=True, nullable=False, unique=True
     )
     username: Mapped[str] = mapped_column(
-        nullable=False, unique=True
+        nullable=True, unique=True
     )
-    password: Mapped[str] = mapped_column(nullable=False, unique=True)
+    password: Mapped[str] = mapped_column(nullable=True, unique=True)
     google_access_token: Mapped[Optional[str]]
     email: Mapped[Optional[str]]
     name: Mapped[Optional[str]]

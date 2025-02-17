@@ -4,8 +4,7 @@ from fabric import task
 @task
 def runserver(
     c, host='0.0.0.0', port='8000',
-    env_file='.local.env'
-    # env_file='.env'
+    env_file='.env'
 ):
     c.run(f'poetry run uvicorn main:app --host {host} --port {port} --reload '
           f'--env-file {env_file}')

@@ -49,10 +49,10 @@ async def google_login(
 
 @router.get(
     '/google',
-    response_class=RedirectResponse
+    response_model=UserLoginSchema
 )
-async def google_auth(
+def google_auth(
     auth_service: Annotated[AuthService, Depends(get_auth_service)],
     code: str
-) -> RedirectResponse:
+) -> UserLoginSchema: # redirect?
     return auth_service.google_auth(code=code)

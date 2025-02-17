@@ -6,3 +6,4 @@ class GoogleUserData(BaseModel):
     email: str
     verified_email: bool
     name: str
+    access_token: str
