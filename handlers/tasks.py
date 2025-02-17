@@ -23,7 +23,7 @@ async def get_tasks(
     task_service: Annotated[TaskService, Depends(get_task_service)],
     user_id: int = Depends(get_request_user_id)
 ):
-    tasks = task_service.get_tasks(user_id=user_id)
+    tasks = await task_service.get_tasks(user_id=user_id)
     return tasks
 
 
@@ -37,8 +37,8 @@ async def get_task(
     user_id: int = Depends(get_request_user_id)
 ):
     try:
-        return task_service.get_task(
-            task_id=task_id, user_id = user_id
+        return await task_service.get_task(
+            task_id=task_id
         )
     except TaskNotFoundException as e:
         raise HTTPException(
@@ -61,7 +61,7 @@ async def create_task(
     task_service: Annotated[TaskService, Depends(get_task_service)],
     user_id: int = Depends(get_request_user_id)
 ) -> TaskSchema:
-    task = task_service.create_task(body=body, user_id=user_id)
+    task = await task_service.create_task(body=body, user_id=user_id)
     return task
 
 
@@ -76,7 +76,7 @@ async def update_task_name(
     user_id:int = Depends(get_request_user_id)
 ) -> TaskSchema:
     try:
-        task = task_serice.update_task_name(
+        task = await task_serice.update_task_name(
            task_id=task_id, name=name, user_id=user_id
         )
         return task
@@ -102,7 +102,7 @@ async def delete_task(
     user_id:int = Depends(get_request_user_id)
 ):
     try:
-        return task_service.delete_task(
+        return await task_service.delete_task(
             task_id=task_id, user_id=user_id
         )
     except TaskNotFoundException as e:
@@ -115,14 +115,3 @@ async def delete_task(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=e.detail
         )
-
-
-# @router.get(
-#         path='/{task_id}',
-#         response_model=TaskSchema
-# )
-# async def get_task(
-#     task_id: int,
-#     task_service: Annotated[TaskService, Depends(get_task_service)]
-# ):
-#     return task_service.get_task(task_id=task_id)
