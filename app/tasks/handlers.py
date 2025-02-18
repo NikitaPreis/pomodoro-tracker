@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, status, HTTPException
 
 from app.exception import TaskNotFoundException, UserNotFoundException
 from app.dependecy import get_task_service, get_cache_tasks_repository, get_tasks_repository, get_request_user_id
-from app.repository import TaskRepository, TaskCache
-from app.service import TaskService
-from app.schema.tasks import TaskSchema, TaskCreateSchema
+from app.tasks.repository import TaskRepository, TaskCache
+from app.tasks.service import TaskService
+from app.tasks.schema import TaskSchema, TaskCreateSchema
 
 
 router = APIRouter(
