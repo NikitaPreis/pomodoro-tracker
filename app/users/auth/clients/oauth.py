@@ -3,7 +3,6 @@ from dataclasses import dataclass
 import httpx
 
 from app.settings import Settings
-from schema import GoogleUserData
 
 
 @dataclass

@@ -4,8 +4,8 @@ from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
-from app.schema import UserCreateSchema
-from app.models import UserProfile
+from app.users.user_profile.schema import UserCreateSchema
+from app.users.user_profile.models import UserProfile
 
 
 @dataclass
