@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import datetime as dt
+from datetime import timedelta
 
 from jose import jwt, JWTError
 
@@ -68,15 +69,20 @@ class AuthService:
         )
 
     def generate_access_token(self, user_id: int) -> str:
-        expire_date_unix = (
-            dt.datetime.now() + dt.timedelta(days=7)
-        ).timestamp()
-        token = jwt.encode(
-            {'user_id': user_id, 'expire': expire_date_unix},
-            self.settings.JWT_SECRET_KEY,
+
+        payload = {
+            'user_id': user_id,
+            'expire': (dt.datetime.now(tz=dt.UTC) + timedelta(
+                days=7
+            )).timestamp()
+        }
+
+        encoded_jwt = jwt.encode(
+            payload, self.settings.JWT_SECRET_KEY,
             algorithm=self.settings.JWT_ENCODE_ALHORITHM
         )
-        return token
+        return encoded_jwt
+
 
     def get_user_id_from_access_token(self, access_token: str) -> int:
         try:
@@ -94,5 +100,7 @@ class AuthService:
     def _validate_auth_user(user: UserProfile, password: str):
         if not user:
             raise UserNotFoundException
+        print(user.password)
+        print(password)
         if user.password != password:
             raise UserNotCorrectPasswordException
