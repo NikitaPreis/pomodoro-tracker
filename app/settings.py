@@ -16,9 +16,22 @@ class Settings(BaseSettings):
     DB_HOST: str = 'localhost'
     DB_PORT: int = 5432
 
+    TESTING: str = 'False'
+
+    TEST_DB_DRIVER: str = 'postgresql+asyncpg'
+    TEST_DB_PASSWORD: str = 'mysecretpassword'
+    TEST_DB_USER: str = 'postgres'
+    TEST_DB_NAME: str = 'test_pomodoro'
+    TEST_DB_HOST: str = 'localhost'
+    TEST_DB_PORT: int = 6432
+
     CACHE_HOST: str = '127.0.0.1'
     CACHE_PORT: int = 6379
     CACHE_DB: int = 0
+
+    TEST_CACHE_HOST: str = '127.0.0.1'
+    TEST_CACHE_PORT: int = 6380
+    TEST_CACHE_DB: int = 0
 
     JWT_SECRET_KEY: str = 'secret_key'
     JWT_ENCODE_ALHORITHM: str = 'HS256'
@@ -33,14 +46,18 @@ class Settings(BaseSettings):
     YANDEX_REDIRECT_URI: str = ''
     YANDEX_TOKEN_URL: str = 'https://oauth.yandex.ru/token'
 
-
-    @property
-    def db_url(self):
-        # correct_url = 'postgresql+psycopg2://postgres:mysecretpassword@localhost:5432/pomodoro'
-        return (f'{self.DB_DRIVER}://{self.DB_USER}:'
-                f'{self.DB_PASSWORD}@{self.DB_HOST}:'
-                f'{self.DB_PORT}/{self.DB_NAME}')
-
+    if TESTING == 'True':
+        @property
+        def db_url(self):
+            return (f'{self.TEST_DB_DRIVER}://{self.TEST_DB_USER}:'
+                    f'{self.TEST_DB_PASSWORD}@{self.TEST_DB_HOST}:'
+                    f'{self.TEST_DB_PORT}/{self.TEST_DB_NAME}')
+    else:
+        @property
+        def db_url(self):
+            return (f'{self.DB_DRIVER}://{self.DB_USER}:'
+                    f'{self.DB_PASSWORD}@{self.DB_HOST}:'
+                    f'{self.DB_PORT}/{self.DB_NAME}')
 
     @property
     def google_redirect_url(self) -> str:
