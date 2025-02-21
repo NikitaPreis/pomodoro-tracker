@@ -2,6 +2,8 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    TESTING: str = 'True'
+
     POSTGRES_DRIVER: str = 'postgresql+psycopg2'
     POSTGRES_PASSWORD: str = 'mysecretpassword'
     POSTGRES_USER: str = 'postgres_user'
@@ -15,6 +17,7 @@ class Settings(BaseSettings):
     DB_NAME: str = 'pomodoro'
     DB_HOST: str = 'localhost'
     DB_PORT: int = 5432
+    TEST_DB_NAME: str = 'pomodoro-test'
 
     CACHE_HOST: str = '127.0.0.1'
     CACHE_PORT: int = 6379
@@ -33,14 +36,17 @@ class Settings(BaseSettings):
     YANDEX_REDIRECT_URI: str = ''
     YANDEX_TOKEN_URL: str = 'https://oauth.yandex.ru/token'
 
-
     @property
     def db_url(self):
-        # correct_url = 'postgresql+psycopg2://postgres:mysecretpassword@localhost:5432/pomodoro'
-        return (f'{self.DB_DRIVER}://{self.DB_USER}:'
-                f'{self.DB_PASSWORD}@{self.DB_HOST}:'
-                f'{self.DB_PORT}/{self.DB_NAME}')
-
+        if self.TESTING == 'True':
+            url = (f'{self.DB_DRIVER}://{self.DB_USER}:'
+                   f'{self.DB_PASSWORD}@{self.DB_HOST}:'
+                   f'{self.DB_PORT}/{self.TEST_DB_NAME}')
+        else:
+            url = (f'{self.DB_DRIVER}://{self.DB_USER}:'
+                   f'{self.DB_PASSWORD}@{self.DB_HOST}:'
+                   f'{self.DB_PORT}/{self.DB_NAME}') 
+        return url
 
     @property
     def google_redirect_url(self) -> str:

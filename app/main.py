@@ -16,6 +16,8 @@ router = APIRouter(
 
 @router.get('/db')
 async def ping_db():
+    from app.settings import settings
+    print(settings.db_url)
     return {'message': 'ok'}
 
 
