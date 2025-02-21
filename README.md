@@ -82,7 +82,7 @@ POSTGRES_PORT=5432
 
 Запустить Docker daemon и ввести команду для запуска БД (PostgreSQL) в контейнере через Docker Compose:
 ```
-docker compose up
+docker compose -f docker-compose.yml up
 ```
 
 Запустить сервер, создать и выполнить миграции:
