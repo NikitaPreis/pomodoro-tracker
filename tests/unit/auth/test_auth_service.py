@@ -21,24 +21,24 @@ pytestmark = pytest.mark.asyncio
 class TestAuthService:
 
     async def test_get_google_redirect_url_success(
-        self, auth_service: AuthService, settings: Settings
+        self, mock_auth_service: AuthService, settings: Settings
     ):
         settings_google_redirect_url = settings.google_redirect_url
-        auth_service_google_redirect_url = auth_service.get_google_redirect_url()
-        assert settings_google_redirect_url == auth_service_google_redirect_url
+        mock_auth_service_google_redirect_url = mock_auth_service.get_google_redirect_url()
+        assert settings_google_redirect_url == mock_auth_service_google_redirect_url
 
     async def test_get_yandex_redirect_url_success(
-        self, auth_service: AuthService, settings: Settings
+        self, mock_auth_service: AuthService, settings: Settings
     ):
         settings_yandex_redirect_url = settings.yandex_redirect_url
-        auth_service_yandex_redirect_url = auth_service.get_yandex_redirect_url()
-        assert settings_yandex_redirect_url == auth_service_yandex_redirect_url
+        mock_auth_service_yandex_redirect_url = mock_auth_service.get_yandex_redirect_url()
+        assert settings_yandex_redirect_url == mock_auth_service_yandex_redirect_url
 
     async def test_generate_access_token_success(
-        self, auth_service: AuthService, settings: Settings
+        self, mock_auth_service: AuthService, settings: Settings
     ):
         user_id = str(1)
-        access_token = auth_service.generate_access_token(
+        access_token = mock_auth_service.generate_access_token(
             user_id=user_id
         )
 
@@ -55,38 +55,38 @@ class TestAuthService:
         assert (decoded_token_expire - dt.datetime.now(tz=dt.UTC) > dt.timedelta(days=6))
 
     async def test_get_user_id_from_access_token_success(
-        self, auth_service: AuthService,
+        self, mock_auth_service: AuthService,
     ):
         user_id = str(1)
 
-        access_token = auth_service.generate_access_token(
+        access_token = mock_auth_service.generate_access_token(
             user_id=user_id
         )
-        decoded_user_id = auth_service.get_user_id_from_access_token(
+        decoded_user_id = mock_auth_service.get_user_id_from_access_token(
             access_token=access_token
         )
 
         assert decoded_user_id == user_id
 
     async def test_google_auth_success(
-        self, auth_service: AuthService,
+        self, mock_auth_service: AuthService,
     ):
         fake_code = 'fake_code'
 
-        user = await auth_service.google_auth(code=fake_code)
+        user = await mock_auth_service.google_auth(code=fake_code)
 
-        decoded_user_id = auth_service.get_user_id_from_access_token(
+        decoded_user_id = mock_auth_service.get_user_id_from_access_token(
             access_token=user.access_token
         )
 
         assert user.user_id == decoded_user_id
         assert isinstance(user, UserLoginSchema)
 
-    async def test_yandex_auth_success(self, auth_service: AuthService):
+    async def test_yandex_auth_success(self, mock_auth_service: AuthService):
         fake_code = 'fake_code'
 
-        user = await auth_service.yandex_auth(code=fake_code)
-        decoded_user_id = auth_service.get_user_id_from_access_token(
+        user = await mock_auth_service.yandex_auth(code=fake_code)
+        decoded_user_id = mock_auth_service.get_user_id_from_access_token(
             access_token=user.access_token
         )
 
@@ -95,32 +95,32 @@ class TestAuthService:
 
 
     async def test_login_success(
-        self, auth_service: AuthService, user_profile: UserProfileFactory
+        self, mock_auth_service: AuthService, user_profile: UserProfileFactory
     ):
         fake_username = user_profile.username
         fake_password = get_fake_password()
 
         user_profile=fake_password
 
-        user = await auth_service.login(
+        user = await mock_auth_service.login(
             username=fake_username, password=fake_password
         )
 
         assert isinstance(user, UserLoginSchema)
 
     async def test_validate_auth_user_success(
-        self, auth_service: AuthService, user_profile: UserProfileFactory
+        self, mock_auth_service: AuthService, user_profile: UserProfileFactory
     ):
         fake_password = user_profile.password
-        auth_service._validate_auth_user(user=user_profile, password=fake_password)
+        mock_auth_service._validate_auth_user(user=user_profile, password=fake_password)
 
     async def test_validate_auth_user_without_user(
-        self, auth_service: AuthService
+        self, mock_auth_service: AuthService
     ):
         user_profile = None
         fake_password = get_fake_password()
         with pytest.raises(UserNotFoundException) as excinfo:
-            auth_service._validate_auth_user(
+            mock_auth_service._validate_auth_user(
                 user=user_profile, password=fake_password
             )
 
@@ -128,12 +128,12 @@ class TestAuthService:
         assert excinfo.value.detail == UserNotFoundException.detail
 
     async def test_validate_auth_user_with_not_correct_password(
-        self, auth_service: AuthService, user_profile: UserProfileFactory
+        self, mock_auth_service: AuthService, user_profile: UserProfileFactory
     ):
         not_correct_password = 'not_correct_password'
 
         with pytest.raises(UserNotCorrectPasswordException) as excinfo:
-            auth_service._validate_auth_user(
+            mock_auth_service._validate_auth_user(
                 user=user_profile, password=not_correct_password
             )
 

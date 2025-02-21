@@ -27,7 +27,6 @@ class FakeUserRepository:
         return UserProfileFactory(username=username,
                                   password=fake_password)
 
-
 @pytest.fixture
-def user_repository():
+def fake_user_repository():
     return FakeUserRepository()
