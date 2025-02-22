@@ -5,12 +5,13 @@ import pytest
 from pytest_factoryboy import register
 
 from app.users.user_profile.models import UserProfile
+from app.settings import settings
 
 faker = FakerFactory.create()
 
 
 EXISTS_GOOGLE_USER_ID = 20
-EXISTS_GOOGLE_USER_EMAIL = 'google@gmail.com'
+EXISTS_GOOGLE_USER_EMAIL = settings.TEST_GOOGLE_USER_RECIPIENT_EMAIL
 
 
 @register(_name='user_profiles')

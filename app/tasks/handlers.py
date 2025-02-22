@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, BackgroundTasks
 
 from app.exception import TaskNotFoundException, UserNotFoundException
 from app.dependecy import get_task_service, get_cache_tasks_repository, get_tasks_repository, get_request_user_id
@@ -16,20 +16,21 @@ router = APIRouter(
 
 
 @router.get(
-        path='/',
-        response_model=list[TaskSchema]
+    path='/',
+    response_model=list[TaskSchema]
 )
 async def get_tasks(
+    background_tasks: BackgroundTasks,
     task_service: Annotated[TaskService, Depends(get_task_service)],
-    user_id: int = Depends(get_request_user_id)
+    user_id: int = Depends(get_request_user_id),
 ):
     tasks = await task_service.get_tasks(user_id=user_id)
     return tasks
 
 
 @router.get(
-        path='/{task_id}',
-        response_model=TaskSchema
+    path='/{task_id}',
+    response_model=TaskSchema
 )
 async def get_task(
     task_id: int,
@@ -53,8 +54,8 @@ async def get_task(
 
 
 @router.post(
-        '/',
-        response_model=TaskSchema
+    '/',
+    response_model=TaskSchema
 )
 async def create_task(
     body: TaskCreateSchema,
@@ -66,9 +67,9 @@ async def create_task(
 
 
 @router.patch(
-        '/{task_id}',
-        response_model=TaskSchema,
-        status_code=status.HTTP_201_CREATED
+    '/{task_id}',
+    response_model=TaskSchema,
+    status_code=status.HTTP_201_CREATED
 )
 async def update_task_name(
     task_id: int, name: str,
@@ -93,8 +94,8 @@ async def update_task_name(
 
 
 @router.delete(
-        '/{task_id}',
-        status_code=status.HTTP_204_NO_CONTENT
+    '/{task_id}',
+    status_code=status.HTTP_204_NO_CONTENT
 )
 async def delete_task(
     task_id: int,

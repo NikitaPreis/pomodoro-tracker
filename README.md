@@ -8,21 +8,21 @@
 2. Авторизация и аутентификация на JWT-токенах;
 3. Авторизация и аутентификация с Google API (OAuth 2.0);
 4. Авторизация и аутентификация с API Яндекс ID (OAuth 2.0);
-5. Настроено кэширование задач с Redis.
+5. Подключена отправка приветственных сообщений после OAuth-авторизации (SMTP + Яндекс Почта, Celery + Redis);
+6. Настроено кэширование задач с Redis.
 
 ### Стек технологий:
 
 * Python (3.11.9)
 * FastAPI
 * Pydantic
-* Starlette
-* Uvicorn
 * HTTPX
 * Pytest
 * SQLAlchemy
 * Alembic
 * PostgreSQL
 * Redis
+* Celery
 * Docker
 
 ### Как развернуть проект:
@@ -54,6 +54,8 @@ DB_PORT=5432
 
 # Переменные окружения для работы с тестовой БД (SQLAlchemy):
 TEST_DB_NAME=pomodoro-test
+TEST_GOOGLE_USER_RECIPIENT_EMAIL=<email.recipient@gmail.com>  # Укажите действующую почту.
+
 
 # Переменные окружжения для работы с Google API:
 GOOGLE_TOKEN_ID=<google-token-id>
@@ -65,6 +67,14 @@ GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google
 YANDEX_CLIENT_ID=<yandex-client-id>
 YANDEX_CLIENT_SECRET=<yandex-client-secret>
 YANDEX_REDIRECT_URI=http://localhost:8000/auth/yandex
+
+# Переменные окружения для отправки email через Яндекс Почту (SMTP):
+# Документация по настройке Яндекс Почты:
+# https://yandex.ru/support/yandex-360/business/mail/ru/mail-clients/others
+FROM_EMAIL=<sender.email@yandex.ru>  # Разрешите доступ к почтовому ящику с помощью почтовых клиентов
+SMTP_PORT=465
+SMTP_HOST=smtp.yandex.ru
+SMTP_PASSWORD=<new.password.for.app>  # Создайте пароль для приложения
 
 ```
 
@@ -99,6 +109,7 @@ fab runserver
 
 ### Как проверить работу сервиса с помощью тестов:
 * Убедитесь, что вы установили переменные окружения для тестовой базы данных в файле .test.env
+* Установите значение переменной TESTING (str) на 'True' в конфигурации настроек `app.settings`
 * Запустите тестовую базу данных: `docker compose -f docker-compose.test.yml up`
 * Выполните подходящую команду из корневой директории:
 1. Для запуска всех тестов: `pytest`
