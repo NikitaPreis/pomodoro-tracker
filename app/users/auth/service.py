@@ -4,7 +4,7 @@ from datetime import timedelta
 
 from jose import jwt, JWTError
 
-from app.users.auth.clients import GoogleClient, YandexClient
+from app.users.auth.clients import GoogleClient, YandexClient, MailClient
 from app.exception import UserNotFoundException, UserNotCorrectPasswordException, TokenExpired, TokenNotCorrect
 from app.users.user_profile.models import UserProfile
 from app.users.user_profile.repository import UserRepository
@@ -18,6 +18,7 @@ class AuthService:
     user_repository: UserRepository
     google_client: GoogleClient
     yandex_client: YandexClient
+    mail_client: MailClient
     settings: Settings
 
     def get_google_redirect_url(self) -> str:
@@ -37,7 +38,7 @@ class AuthService:
         )
         created_user = await self.user_repository.create_user(create_user_data)
         access_token = self.generate_access_token(user_id=created_user.id)
-        print('user_create')
+        self.mail_client.send_welcom_email(to=user_data.email)
         return UserLoginSchema(user_id=created_user.id, access_token=access_token)
 
     def get_yandex_redirect_url(self) -> str:
@@ -48,7 +49,6 @@ class AuthService:
 
         if user := await self.user_repository.get_user_by_email(email=user_data.default_email):
             access_token = self.generate_access_token(user_id=user.id)
-            print('user_login')
             return UserLoginSchema(user_id=user.id, access_token=access_token)
         create_user_data = UserCreateSchema(
             yandex_access_token=user_data.access_token,
@@ -57,7 +57,7 @@ class AuthService:
         )
         created_user = await self.user_repository.create_user(create_user_data)
         access_token = self.generate_access_token(user_id=created_user.id)
-        print('user_create')
+        self.mail_client.send_welcom_email(to=user_data.default_email)
         return UserLoginSchema(user_id=created_user.id, access_token=access_token)
 
     async def login(self, username: str, password: str) -> UserLoginSchema:

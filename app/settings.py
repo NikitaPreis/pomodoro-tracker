@@ -1,8 +1,10 @@
-from pydantic_settings import BaseSettings
+import os
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    TESTING: str = 'True'
+    TESTING: str = 'False'
 
     POSTGRES_DRIVER: str = 'postgresql+psycopg2'
     POSTGRES_PASSWORD: str = 'mysecretpassword'
@@ -35,6 +37,19 @@ class Settings(BaseSettings):
     YANDEX_CLIENT_SECRET: str = ''
     YANDEX_REDIRECT_URI: str = ''
     YANDEX_TOKEN_URL: str = 'https://oauth.yandex.ru/token'
+
+    CELERY_REDIS_URL: str = 'redis://localhost:6379'
+
+    FROM_EMAIL: str = ''
+    SMTP_PORT: int = 456
+    SMTP_HOST: str = 'smtp.yandex.ru'
+    SMTP_PASSWORD: str = ''
+
+    TEST_GOOGLE_USER_RECIPIENT_EMAIL:str = 'test_recipient@gmail.com'
+
+    BASE_DIR: str = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+    model_config = SettingsConfigDict(env_file=f"{BASE_DIR}/.env")
 
     @property
     def db_url(self):
