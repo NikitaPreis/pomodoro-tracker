@@ -14,8 +14,8 @@ settings = Settings()
 
 
 celery = Celery(__name__)
-celery.conf.broker_url = settings.CELERY_REDIS_URL
-celery.conf.result_backend = settings.CELERY_REDIS_URL
+celery.conf.broker_url = settings.CELERY_BROKER_URL
+celery.conf.result_backend = 'rpc://'
 
 
 @celery.task(name='send_email_task')

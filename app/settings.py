@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    TESTING: str = 'False'
+    TESTING: str = 'True'
 
     POSTGRES_DRIVER: str = 'postgresql+psycopg2'
     POSTGRES_PASSWORD: str = 'mysecretpassword'
@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     YANDEX_TOKEN_URL: str = 'https://oauth.yandex.ru/token'
 
     CELERY_REDIS_URL: str = 'redis://localhost:6379'
+    CELERY_BROKER_URL: str = 'amqp://guest:guest@localhost:5672//'
 
     FROM_EMAIL: str = ''
     SMTP_PORT: int = 456
