@@ -1,17 +1,33 @@
-import smtplib
-import ssl
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+from dataclasses import dataclass
+import json
+from uuid import uuid4
+
+import aio_pika
 
 from app.settings import Settings
-from worker.celery import send_email_task
 
+
+@dataclass
 class MailClient:
+    settings: Settings
 
-    @staticmethod
-    def send_welcom_email(to: str) -> None:
-        return send_email_task.delay(
-            subject='Welcome email',
-            text=f'Welcome to pomodoro, {to}!',
-            to=to
-        )
+    async def send_welcom_email(self, to: str) -> None:
+        connection = await aio_pika.connect_robust(self.settings.AMQP_URL)
+        email_body = {
+            'message': 'Welcome to pomodoro',
+            'user_email': to,
+            'subject': 'Welcom message'
+        }
+
+        async with connection:
+            channel = await connection.channel()
+            message = aio_pika.Message(
+                body=json.dumps(email_body).encode(),
+                correlation_id=str(uuid4()),
+                reply_to='callback_mail_queue'
+            )
+            await channel.default_exchange.publish(
+                message=message,
+                routing_key='mail_queue'
+            )
+        return
