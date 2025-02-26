@@ -39,7 +39,10 @@ class Settings(BaseSettings):
     YANDEX_TOKEN_URL: str = 'https://oauth.yandex.ru/token'
 
     CELERY_REDIS_URL: str = 'redis://localhost:6379'
-    AMQP_URL: str = 'amqp://guest:guest@localhost:5672//'
+    BROKER_URL: str = 'localhost:9092'
+
+    EMAIL_TOPIC: str = 'email_topic'
+    EMAIL_CALLBACK_TOPIC: str = 'email_callback_topic'
 
     FROM_EMAIL: str = ''
     SMTP_PORT: int = 456
