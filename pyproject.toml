@@ -1,11 +1,10 @@
 [project]
-name = "pomodoro-tracker-poetry"
+name = "app"
 version = "0.1.0"
 description = ""
 authors = [
     {name = "Никита Кузнецов",email = "eudaimonia22@yandex.ru"}
 ]
-readme = "README.md"
 requires-python = ">=3.11,<4.0"
 dependencies = [
     "fastapi (>=0.115.6,<0.116.0)",
@@ -14,8 +13,6 @@ dependencies = [
     "pydantic-settings (>=2.7.1,<3.0.0)",
     "sqlalchemy (>=2.0.36,<3.0.0)",
     "alembic (>=1.14.0,<2.0.0)",
-    "psycopg2 (>=2.9.10,<3.0.0)",
-    "psycopg2-binary (>=2.9.10,<3.0.0)",
     "redis (>=5.2.1,<6.0.0)",
     "python-jose[cryptograthy] (>=3.3.0,<4.0.0)",
     "requests (>=2.32.3,<3.0.0)",

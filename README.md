@@ -42,19 +42,21 @@ cd pomodoro-tracker
 POSTGRES_PASSWORD=mysecretpassword
 POSTGRES_USER=postgres
 POSTGRES_DB=pomodoro
-POSTGRES_HOST=localhost
+POSTGRES_HOST=db
 POSTGRES_PORT=5432
 
 # Переменные окружения для работы с БД (SQLAlchemy, Alembic):
-DB_DRIVER=postgresql+psycopg2
+DB_DRIVER=postgresql+asyncpg
 DB_PASSWORD=mysecretpassword
 DB_USER=postgres
 DB_NAME=pomodoro
-DB_HOST=localhost
+DB_HOST=db
 DB_PORT=5432
+
 
 # Переменные окружения для работы с тестовой БД (SQLAlchemy):
 TEST_DB_NAME=pomodoro-test
+TEST_DB_HOST=localhost
 TEST_GOOGLE_USER_RECIPIENT_EMAIL=<email.recipient@gmail.com>  # Укажите действующую почту.
 
 
@@ -91,16 +93,16 @@ POSTGRES_PORT=5432
 ```
 
 
-Запустить Docker daemon и ввести команду для запуска БД (PostgreSQL) в контейнере через Docker Compose:
+Запустить проект через Docker-Compose:
 ```
-docker compose -f docker-compose.yml up
+docker compose -f docker-compose.yml up --build
 ```
 
-Запустить сервер, создать и выполнить миграции:
+Создать и выполнить миграции в контейнере:
 ```
+docker compose -f docker-compose.yml up --build
 fab makemigrations
 fab migrate
-fab runserver
 ```
 
 Документация будет доступна по адресу: 
