@@ -12,7 +12,7 @@ class MailClient:
     settings: Settings
 
     async def send_welcom_email(self, to: str) -> None:
-        connection = await aio_pika.connect_robust(self.settings.AMQP_URL)
+        connection = await aio_pika.connect_robust(self.settings.amqp_url)
         email_body = {
             'message': 'Welcome to pomodoro',
             'user_email': to,

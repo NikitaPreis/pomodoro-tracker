@@ -41,7 +41,6 @@ class Settings(BaseSettings):
     YANDEX_TOKEN_URL: str = 'https://oauth.yandex.ru/token'
 
     CELERY_REDIS_URL: str = 'redis://localhost:6379'
-    # AMQP_URL: str = 'amqp://guest:guest@localhost:5672//'
     AMQP_URL: str = 'amqp://guest:guest@rabbitmq:5672//'
 
     FROM_EMAIL: str = ''
@@ -66,6 +65,12 @@ class Settings(BaseSettings):
                    f'{self.DB_PASSWORD}@{self.DB_HOST}:'
                    f'{self.DB_PORT}/{self.DB_NAME}')
         return url
+
+    @property
+    def amqp_url(self):
+        if self.TESTING == 'True':
+            return 'amqp://guest:guest@localhost:5672//'
+        return 'amqp://guest:guest@rabbitmq:5672//'
 
     @property
     def google_redirect_url(self) -> str:

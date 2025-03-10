@@ -98,13 +98,6 @@ POSTGRES_PORT=5432
 docker compose -f docker-compose.yml up --build
 ```
 
-Создать и выполнить миграции в контейнере:
-```
-docker compose -f docker-compose.yml up --build
-fab makemigrations
-fab migrate
-```
-
 Документация будет доступна по адресу: 
 
 * http://localhost:8000/docs
@@ -117,6 +110,7 @@ fab migrate
 * Убедитесь, что вы установили переменные окружения для тестовой базы данных в файле .test.env
 * Установите значение переменной TESTING (str) на 'True' в конфигурации настроек `app.settings`
 * Запустите тестовую базу данных: `docker compose -f docker-compose.test.yml up`
+* Для корректной работы интеграционных тестов запустите сервис для отправки сообщений на почту;
 * Выполните подходящую команду из корневой директории:
 1. Для запуска всех тестов: `pytest`
 2. Для запуска unit-тестов и компонетных тестов: `pytest tests/unit/`

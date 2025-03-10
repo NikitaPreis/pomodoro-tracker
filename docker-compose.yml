@@ -13,18 +13,24 @@ services:
     env_file: .test.env
     volumes:
       - pg_data:/var/lib/postgresql/data
+    networks:
+      - pomodoro-net
 
   cache:
     image: redis:7.2.4-alpine
     restart: always
     ports:
       - '6379:6379'
+    networks:
+      - pomodoro-net
 
   rabbitmq:
     image: rabbitmq:3-management
     ports:
       - "5672:5672"
       - "15672:15672"
+    networks:
+      - pomodoro-net
 
   app:
     build: .
@@ -34,3 +40,9 @@ services:
       - rabbitmq
       - db
       - cache
+    networks:
+      - pomodoro-net
+
+networks:
+  pomodoro-net:
+    driver: bridge
