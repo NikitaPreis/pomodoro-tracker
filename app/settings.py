@@ -4,7 +4,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    TESTING: str = 'True'
+    TESTING: str = 'False'
+    ENV_FILE: str = '.env'
 
     POSTGRES_DRIVER: str = 'postgresql+psycopg2'
     POSTGRES_PASSWORD: str = 'mysecretpassword'
@@ -20,6 +21,7 @@ class Settings(BaseSettings):
     DB_HOST: str = 'localhost'
     DB_PORT: int = 5432
     TEST_DB_NAME: str = 'pomodoro-test'
+    TEST_DB_HOST: str = 'localhost'
 
     CACHE_HOST: str = '127.0.0.1'
     CACHE_PORT: int = 6379
@@ -39,7 +41,7 @@ class Settings(BaseSettings):
     YANDEX_TOKEN_URL: str = 'https://oauth.yandex.ru/token'
 
     CELERY_REDIS_URL: str = 'redis://localhost:6379'
-    AMQP_URL: str = 'amqp://guest:guest@localhost:5672//'
+    AMQP_URL: str = 'amqp://guest:guest@rabbitmq:5672//'
 
     FROM_EMAIL: str = ''
     SMTP_PORT: int = 456
@@ -50,19 +52,25 @@ class Settings(BaseSettings):
 
     BASE_DIR: str = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
-    model_config = SettingsConfigDict(env_file=f"{BASE_DIR}/.env")
+    model_config = SettingsConfigDict(env_file=f"{BASE_DIR}/{ENV_FILE}")
 
     @property
     def db_url(self):
         if self.TESTING == 'True':
             url = (f'{self.DB_DRIVER}://{self.DB_USER}:'
-                   f'{self.DB_PASSWORD}@{self.DB_HOST}:'
+                   f'{self.DB_PASSWORD}@{self.TEST_DB_HOST}:'
                    f'{self.DB_PORT}/{self.TEST_DB_NAME}')
         else:
             url = (f'{self.DB_DRIVER}://{self.DB_USER}:'
                    f'{self.DB_PASSWORD}@{self.DB_HOST}:'
-                   f'{self.DB_PORT}/{self.DB_NAME}') 
+                   f'{self.DB_PORT}/{self.DB_NAME}')
         return url
+
+    @property
+    def amqp_url(self):
+        if self.TESTING == 'True':
+            return 'amqp://guest:guest@localhost:5672//'
+        return 'amqp://guest:guest@rabbitmq:5672//'
 
     @property
     def google_redirect_url(self) -> str:

@@ -42,19 +42,21 @@ cd pomodoro-tracker
 POSTGRES_PASSWORD=mysecretpassword
 POSTGRES_USER=postgres
 POSTGRES_DB=pomodoro
-POSTGRES_HOST=localhost
+POSTGRES_HOST=db
 POSTGRES_PORT=5432
 
 # Переменные окружения для работы с БД (SQLAlchemy, Alembic):
-DB_DRIVER=postgresql+psycopg2
+DB_DRIVER=postgresql+asyncpg
 DB_PASSWORD=mysecretpassword
 DB_USER=postgres
 DB_NAME=pomodoro
-DB_HOST=localhost
+DB_HOST=db
 DB_PORT=5432
+
 
 # Переменные окружения для работы с тестовой БД (SQLAlchemy):
 TEST_DB_NAME=pomodoro-test
+TEST_DB_HOST=localhost
 TEST_GOOGLE_USER_RECIPIENT_EMAIL=<email.recipient@gmail.com>  # Укажите действующую почту.
 
 
@@ -91,16 +93,9 @@ POSTGRES_PORT=5432
 ```
 
 
-Запустить Docker daemon и ввести команду для запуска БД (PostgreSQL) в контейнере через Docker Compose:
+Запустить проект через Docker-Compose:
 ```
-docker compose -f docker-compose.yml up
-```
-
-Запустить сервер, создать и выполнить миграции:
-```
-fab makemigrations
-fab migrate
-fab runserver
+docker compose -f docker-compose.yml up --build
 ```
 
 Документация будет доступна по адресу: 
@@ -115,6 +110,7 @@ fab runserver
 * Убедитесь, что вы установили переменные окружения для тестовой базы данных в файле .test.env
 * Установите значение переменной TESTING (str) на 'True' в конфигурации настроек `app.settings`
 * Запустите тестовую базу данных: `docker compose -f docker-compose.test.yml up`
+* Для корректной работы интеграционных тестов запустите сервис для отправки сообщений на почту;
 * Выполните подходящую команду из корневой директории:
 1. Для запуска всех тестов: `pytest`
 2. Для запуска unit-тестов и компонетных тестов: `pytest tests/unit/`

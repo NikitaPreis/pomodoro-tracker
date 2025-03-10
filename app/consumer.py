@@ -4,6 +4,7 @@ import aio_pika
 
 from app.infrastructure.broker.accessor import get_broker_connection
 
+
 async def make_amqp_consumer():
     connection = await get_broker_connection()
     channel = await connection.channel()
