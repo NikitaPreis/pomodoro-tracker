@@ -1,5 +1,3 @@
-import json
-
 import aio_pika
 
 from app.infrastructure.broker.accessor import get_broker_connection

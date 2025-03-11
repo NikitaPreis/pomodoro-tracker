@@ -8,9 +8,10 @@ from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.categories.handlers import router as category_router
 from app.consumer import make_amqp_consumer
 from app.infrastructure.database.accessor import get_db_session, init_models
-from app.tasks.handlers import router as tasks_router
+from app.core.tasks.handlers import router as tasks_router
 from app.users.auth.handlers import router as auth_router
 from app.users.user_profile.handlers import router as user_router
 
@@ -64,5 +65,6 @@ async def ping_db(
 
 app.include_router(router)
 app.include_router(tasks_router)
+app.include_router(category_router)
 app.include_router(auth_router)
 app.include_router(user_router)

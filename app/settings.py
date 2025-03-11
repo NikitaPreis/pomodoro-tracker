@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    TESTING: str = 'False'
+    TESTING: str = 'True'
     ENV_FILE: str = '.env'
 
     POSTGRES_DRIVER: str = 'postgresql+psycopg2'
