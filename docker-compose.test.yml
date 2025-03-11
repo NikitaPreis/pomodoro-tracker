@@ -1,8 +1,5 @@
 version: '3.9'
 
-volumes:
-  pg_data:
-
 services:
   db-test:
     image: postgres:16.2
@@ -11,8 +8,6 @@ services:
     ports:
       - '5432:5432'
     env_file: .test.env
-    volumes:
-      - pg_data:/var/lib/postgresql/test_data
 
   cache-test:
     image: redis:7.2.4-alpine

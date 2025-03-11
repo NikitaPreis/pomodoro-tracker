@@ -1,10 +1,11 @@
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, model_validator
 
 
 class TaskSchema(BaseModel):
     id: int | None = None 
     name: str | None = None
     pomodoro_count: int | None = None
+    status: str | None = None
     category_id: int
     user_id: int
 

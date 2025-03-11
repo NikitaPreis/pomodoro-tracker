@@ -5,13 +5,15 @@ import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
+from app.core.categories.repository import CategoryRepository
+from app.core.categories.service import CategoryService
 from app.infrastructure.cache import get_redis_connection
 from app.users.auth.clients import GoogleClient, YandexClient, MailClient
 from app.infrastructure.database import get_db_session
 from app.exception import TokenExpired, TokenNotCorrect
-from app.tasks.repository import TaskRepository, TaskCache
+from app.core.tasks.repository import TaskRepository, TaskCache
 from app.users.user_profile.repository import UserRepository
-from app.tasks.service import TaskService
+from app.core.tasks.service import TaskService
 from app.users.auth.service import AuthService
 from app.users.user_profile.service import UserService
 from app.settings import Settings
@@ -49,6 +51,12 @@ async def get_tasks_repository(
     return TaskRepository(db_session)
 
 
+async def get_category_repository(
+    db_session: Annotated[AsyncSession, Depends(get_db_session)]
+) -> CategoryRepository:
+    return CategoryRepository(db_session=db_session)
+
+
 async def get_user_repository(
     db_session: Annotated[AsyncSession, Depends(get_db_session)]
 ) -> UserRepository:
@@ -64,12 +72,26 @@ async def get_cache_tasks_repository() -> TaskCache:
 
 
 async def get_task_service(
-    task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)],
-    task_cache: Annotated[TaskCache, Depends(get_cache_tasks_repository)]
+    task_repository: Annotated[TaskRepository,
+                               Depends(get_tasks_repository)],
+    task_cache: Annotated[TaskCache,
+                          Depends(get_cache_tasks_repository)],
+    category_repository: Annotated[CategoryRepository,
+                                   Depends(get_category_repository)]
 ) -> TaskService:
     return TaskService(
         task_repository=task_repository,
-        task_cache=task_cache
+        task_cache=task_cache,
+        category_repository=category_repository
+    )
+
+
+async def get_category_service(
+    category_repository: Annotated[CategoryRepository,
+                                   Depends(get_category_repository)]
+) -> CategoryService:
+    return CategoryService(
+        category_repository=category_repository
     )
 
 
