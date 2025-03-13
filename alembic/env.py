@@ -6,8 +6,10 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from app.tasks.models import *
+from app.core.tasks.models import *
+from app.core.categories.models import *
 from app.users.user_profile.models import *
+from app.users.user_settings.models import *
 from app.infrastructure.database import Base
 from app.settings import Settings
 

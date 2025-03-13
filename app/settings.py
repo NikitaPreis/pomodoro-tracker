@@ -4,9 +4,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    TESTING: str = 'True'
+    # Test and enviroment.
+    TESTING: str = 'False'
     ENV_FILE: str = '.env'
 
+    # PostgreSQL DB credentials.
     POSTGRES_DRIVER: str = 'postgresql+psycopg2'
     POSTGRES_PASSWORD: str = 'mysecretpassword'
     POSTGRES_USER: str = 'postgres_user'
@@ -14,44 +16,57 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str = 'localhost'
     POSTGRES_PORT: int = 5432
 
+    # SQLAlchemy DB connection credentials.
     DB_DRIVER: str = 'postgresql+asyncpg'
     DB_PASSWORD: str = 'mysecretpassword'
     DB_USER: str = 'postgres'
     DB_NAME: str = 'pomodoro'
     DB_HOST: str = 'localhost'
     DB_PORT: int = 5432
+
+    # SQLAlchemy test-DB connection credentials.
     TEST_DB_NAME: str = 'pomodoro-test'
     TEST_DB_HOST: str = 'localhost'
 
+    # Cache connection credentials.
     CACHE_HOST: str = '127.0.0.1'
     CACHE_PORT: int = 6379
     CACHE_DB: int = 0
 
+    # JWT settings.
     JWT_SECRET_KEY: str = 'secret_key'
     JWT_ENCODE_ALHORITHM: str = 'HS256'
 
+    # Google client settings. Used for OAuth 2.0
     GOOGLE_CLIENT_ID: str = ''
     GOOGLE_CLIENT_SECRET: str = ''
     GOOGLE_REDIRECT_URI: str = ''
     GOOGLE_TOKEN_URL: str = 'https://accounts.google.com/o/oauth2/token'
 
+    # Yandex client settings. Used for OAuth 2.0
     YANDEX_CLIENT_ID: str = ''
     YANDEX_CLIENT_SECRET: str = ''
     YANDEX_REDIRECT_URI: str = ''
     YANDEX_TOKEN_URL: str = 'https://oauth.yandex.ru/token'
 
+    # Broker URLs. AMQP is URL to connect to RabbitMQ.
     CELERY_REDIS_URL: str = 'redis://localhost:6379'
     AMQP_URL: str = 'amqp://guest:guest@rabbitmq:5672//'
 
+    # SMTP
     FROM_EMAIL: str = ''
     SMTP_PORT: int = 456
     SMTP_HOST: str = 'smtp.yandex.ru'
     SMTP_PASSWORD: str = ''
 
+    # Recipient google email for tests (pytest).
+    # Set the email address to which the test email should be sent.
     TEST_GOOGLE_USER_RECIPIENT_EMAIL:str = 'test_recipient@gmail.com'
 
+    # Get base dir of project.
     BASE_DIR: str = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
+    # Set env_file for project. Required for tests.
     model_config = SettingsConfigDict(env_file=f"{BASE_DIR}/{ENV_FILE}")
 
     @property
@@ -74,6 +89,7 @@ class Settings(BaseSettings):
 
     @property
     def google_redirect_url(self) -> str:
+        """Google redirect URL for auth."""
         return (f'https://accounts.google.com/o/oauth2/auth'
                 f'?response_type=code&client_id={self.GOOGLE_CLIENT_ID}'
                 f'&redirect_uri={self.GOOGLE_REDIRECT_URI}'
@@ -81,6 +97,7 @@ class Settings(BaseSettings):
 
     @property
     def yandex_redirect_url(self) -> str:
+        """Yandex redirect URL for auth."""
         return (f'https://oauth.yandex.ru/authorize?response_type=code'
                 f'&client_id={self.YANDEX_CLIENT_ID}'
                 f'&redirect_uri={self.YANDEX_REDIRECT_URI}')
