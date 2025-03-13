@@ -24,6 +24,10 @@ async def get_db_session() -> AsyncSession:
 
 
 async def init_models():
+    """Create all models without Alembic migrations."""
+    from app.core.tasks.models import Task
+    from app.core.categories.models import Category
+    from app.users.user_profile.models import UserProfile
     from app.users.user_settings.models import UserSettings
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

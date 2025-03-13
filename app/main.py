@@ -1,43 +1,20 @@
-from contextlib import asynccontextmanager
 from typing import Annotated
-from time import sleep
 
-from aiormq.exceptions import AMQPConnectionError
 from fastapi import FastAPI, APIRouter, HTTPException, status, Depends
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.categories.handlers import router as category_router
-from app.consumer import make_amqp_consumer
-from app.infrastructure.database.accessor import get_db_session, init_models
+from app.infrastructure.database.accessor import get_db_session
 from app.core.tasks.handlers import router as tasks_router
 from app.users.auth.handlers import router as auth_router
 from app.users.user_profile.handlers import router as user_router
 from app.users.user_settings.handlers import router as user_settings_router
-
-
-async def ampq_con(attempts_to_connection: int = 3):
-    try:
-        await make_amqp_consumer()
-    except AMQPConnectionError as e:
-        print(f'AMQP Connection Error: {e.reason}.')
-        attempts_to_connection =- 1
-        sleep(5)
-        print(f'{attempts_to_connection} attempts left to create AMQP Connection')
-        if attempts_to_connection <= 0:
-            await ampq_con(attempts_to_connection=attempts_to_connection)
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    await init_models()
-    await ampq_con()
-    yield
+from app.utils import lifespan
 
 
 app = FastAPI(lifespan=lifespan)
-
 
 router = APIRouter(
     prefix='/ping',

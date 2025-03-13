@@ -23,6 +23,7 @@ async def get_categories(
     ],
     user_id: int = Depends(get_request_user_id)
 ):
+    """Retrieves all user categories."""
     return await category_service.get_categories(
         user_id=user_id
     ) 
@@ -40,6 +41,7 @@ async def create_category(
     ],
     user_id: int = Depends(get_request_user_id),
 ):
+    """Create user category."""
     try:
         return await category_service.create_category(
             user_id=user_id, body=body
@@ -64,6 +66,7 @@ async def update_category(
     ],
     user_id: int = Depends(get_request_user_id),
 ):
+    """Update user category."""
     try:
         return await category_service.update_category(
             user_id=user_id, category_id=category_id,
@@ -92,6 +95,7 @@ async def delete_category(
     ],
     user_id: int = Depends(get_request_user_id),
 ):
+    """Delete user category."""
     try:
         return await category_service.delete_category(
             user_id=user_id, category_id=category_id
