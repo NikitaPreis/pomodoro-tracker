@@ -20,7 +20,7 @@ class Task(Base):
     pomodoro_count: Mapped[int]
     status: Mapped[TaskStatusEnum] = mapped_column(
         default=TaskStatusEnum.PENDING,
-        # server_default=text("'PENDING'")
+        server_default=text("'PENDING'")
     )
     category_id: Mapped[int] = mapped_column(
         ForeignKey('categories.id'), nullable=False

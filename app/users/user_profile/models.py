@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.infrastructure.database import Base
 
@@ -19,3 +19,6 @@ class UserProfile(Base):
     yandex_access_token: Mapped[Optional[str]]
     email: Mapped[Optional[str]]
     name: Mapped[Optional[str]]
+    user_settings = relationship(
+        'UserSettings', backref='user_data', uselist=False
+    )

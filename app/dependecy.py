@@ -1,9 +1,8 @@
 from typing import Annotated
 
-from fastapi import Depends, Request, security, Security, HTTPException
+from fastapi import Depends, security, Security, HTTPException
 import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 
 from app.core.categories.repository import CategoryRepository
 from app.core.categories.service import CategoryService
@@ -13,6 +12,8 @@ from app.infrastructure.database import get_db_session
 from app.exception import TokenExpired, TokenNotCorrect
 from app.core.tasks.repository import TaskRepository, TaskCache
 from app.users.user_profile.repository import UserRepository
+from app.users.user_settings.repository import UserSettingsRepository
+from app.users.user_settings.service import UserSettingsService
 from app.core.tasks.service import TaskService
 from app.users.auth.service import AuthService
 from app.users.user_profile.service import UserService
@@ -63,6 +64,12 @@ async def get_user_repository(
     return UserRepository(db_session=db_session)
 
 
+async def get_user_settings_repository(
+    db_session: Annotated[AsyncSession, Depends(get_db_session)]
+) -> UserSettingsRepository:
+    return UserSettingsRepository(db_session=db_session)
+
+
 async def get_cache_tasks_repository() -> TaskCache:
     redis_connection = get_redis_connection()
     return TaskCache(redis_connection)
@@ -97,12 +104,16 @@ async def get_category_service(
 
 async def get_auth_service(
     user_repository: UserRepository = Depends(get_user_repository),
+    user_settings_service: UserSettingsService = Depends(
+        get_user_settings_repository
+    ),
     google_client: GoogleClient = Depends(get_google_client),
     yandex_client: YandexClient = Depends(get_yandex_client),
     mail_client: MailClient = Depends(get_mail_client)
 ) -> AuthService:
     return AuthService(
         user_repository=user_repository, settings=Settings(),
+        user_settings_service=user_settings_service,
         google_client=google_client,
         yandex_client=yandex_client,
         mail_client=mail_client
@@ -111,10 +122,24 @@ async def get_auth_service(
 
 async def get_user_service(
     user_repository: UserRepository = Depends(get_user_repository),
-    auth_service: AuthService = Depends(get_auth_service)
+    user_settings_service: UserSettingsService = Depends(
+        get_user_settings_repository
+    ),
+    auth_service: AuthService = Depends(get_auth_service),
 ) -> UserService:
     return UserService(
-        user_repository=user_repository, auth_service=auth_service
+        user_repository=user_repository, auth_service=auth_service,
+        user_settings_service=user_settings_service
+    )
+
+
+async def get_user_settings_service(
+    user_settings_repository: UserSettingsRepository = Depends(
+        get_user_settings_repository
+    )
+) -> UserSettingsService:
+    return UserSettingsService(
+        user_settings_repository=user_settings_repository
     )
 
 

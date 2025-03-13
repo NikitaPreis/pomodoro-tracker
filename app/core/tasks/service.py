@@ -4,9 +4,12 @@ from app.exception import (TaskNotFoundException,
                            TaskStatusNotCorrect,
                            CategoryNotFoundException)
 from app.core.categories.repository import CategoryRepository
-from app.core.tasks.models import TaskStatusEnum
+from app.constants import TASK_STATUSES
+from app.core.tasks.models import Task
 from app.core.tasks.repository import TaskCache, TaskRepository
-from app.core.tasks.schema import TaskSchema, TaskCreateSchema
+from app.core.tasks.schema import (TaskSchema, TaskCreateSchema,
+                                   TaskUpdateSchema)
+from app.core.tasks.utils import TaskFilter
 
 
 @dataclass
@@ -17,6 +20,14 @@ class TaskService:
 
     async def get_tasks(self, user_id: int):
         tasks = await self.task_repository.get_tasks(user_id=user_id)
+        return tasks
+
+    async def get_filtered_tasks(
+        self, user_id: int, task_filter: TaskFilter
+    ):
+        tasks = await self.task_repository.get_filtered_tasks(
+            user_id=user_id, task_filter=task_filter
+        )
         return tasks
 
     async def get_task(self, task_id: int) -> TaskSchema:
@@ -45,41 +56,45 @@ class TaskService:
         )
         return task_schema
 
-    async def update_task_name(
-            self, task_id: int, name: str, user_id: int
-    ) -> TaskSchema:
-        task = await self.task_repository.get_user_task(
-            user_id=user_id, task_id=task_id
+    async def update_task(
+        self, task_id: int, user_id: int, task: TaskUpdateSchema
+    ):
+        await self._check_task_status_correct(task_status=task.status)
+        await self._check_users_task_exists(
+            task_id=task_id, user_id=user_id
         )
-        if not task:
-            raise TaskNotFoundException
-        task = await self.task_repository.update_task_name(task_id=task_id, name=name)
-        task_schema = TaskSchema.model_validate(task)
+        updated_task: Task = await self.task_repository.update_task(
+            task_id=task_id, user_id=user_id, task=task
+        )
+        task_schema = TaskSchema.model_validate(updated_task)
         await self.task_cache.delete_task(task_id=task_id)
         return task_schema
 
-    async def delete_task(self, task_id: int, user_id: int):
-        task = await self.task_repository.get_user_task(
+
+    async def delete_task(self, task_id: int, user_id: int) -> None:
+        await self._check_users_task_exists(
             task_id=task_id, user_id=user_id
         )
-        if not task:
-            raise TaskNotFoundException
         await self.task_repository.delete_task(task_id=task_id, user_id=user_id)
         await self.task_cache.delete_task(task_id=task_id)
 
-    async def task_done(
-        self, user_id: int, task_id
-    ):
-        pass
+    async def update_task_name(
+        self, task_id: int, name: str, user_id: int
+    ) -> TaskSchema:
+        await self._check_users_task_exists(
+            task_id=task_id, user_id=user_id
+        )
+        updated_task = await self.task_repository.update_task_name(task_id=task_id, name=name)
+        task_schema = TaskSchema.model_validate(updated_task)
+        await self.task_cache.delete_task(task_id=task_id)
+        return task_schema
 
     async def update_task_category(
         self, user_id: int, task_id: int, category_name: int
     ):
-        task = await self.task_repository.get_user_task(
-            user_id=user_id, task_id=task_id
+        await self._check_users_task_exists(
+            task_id=task_id, user_id=user_id
         )
-        if not task:
-            raise TaskNotFoundException
         category = await self.category_repository.get_category_by_name(
             user_id=user_id, category_name=category_name
         )
@@ -89,33 +104,50 @@ class TaskService:
             user_id=user_id, task_id=task_id, category_id=category.id
         )
         task_schema = TaskSchema.model_validate(updated_task)
+        await self.task_cache.delete_task(task_id=task_id)
         return task_schema
-
-    async def get_tasks_by_category(
-        self, user_id: int, category_name: int,
-    ) -> list[TaskSchema]:
-        category = await self.category_repository.get_category_by_name(
-            category_name=category_name, user_id=user_id
-        )
-        if not category:
-            raise CategoryNotFoundException
-        tasks = await self.task_repository.get_tasks_by_category_name(
-            user_id=user_id, category_name=category_name
-        )
-        if not tasks:
-            raise TaskNotFoundException
-        return [TaskSchema.model_validate(task) for task in tasks]
 
     async def update_task_status(
         self, user_id: int, task_id: int, task_status: str
     ) -> TaskSchema:
-        task = await self.task_repository.get_task(task_id=task_id)
+        await self._check_task_status_correct(task_status=task_status)
+        await self._check_users_task_exists(
+            task_id=task_id, user_id=user_id
+        )
+        updated_task = await self.task_repository.update_task_status(
+            user_id=user_id, task_id=task_id, task_status=task_status
+        )
+        task_schema = TaskSchema.model_validate(updated_task)
+        await self.task_cache.delete_task(task_id=task_id)
+        return task_schema
+
+    async def _check_users_task_exists(
+        self, task_id: int, user_id: int
+    ) -> Task:
+        task = await self.task_repository.get_user_task(
+            user_id=user_id, task_id=task_id
+        )
         if not task:
             raise TaskNotFoundException
-        try:
-            updated_task = await self.task_repository.update_task_status(
-                user_id=user_id, task_id=task_id, task_status=task_status
-            )
-        except Exception as e:
+        return task
+
+    async def _check_task_status_correct(
+        self, task_status: str
+    ) -> None:
+        if task_status not in TASK_STATUSES:
             raise TaskStatusNotCorrect
-        return TaskSchema.model_validate(updated_task)
+
+    # async def get_tasks_by_category(
+    #     self, user_id: int, category_name: int,
+    # ) -> list[TaskSchema]:
+    #     category = await self.category_repository.get_category_by_name(
+    #         category_name=category_name, user_id=user_id
+    #     )
+    #     if not category:
+    #         raise CategoryNotFoundException
+    #     tasks = await self.task_repository.get_tasks_by_category_name(
+    #         user_id=user_id, category_name=category_name
+    #     )
+    #     if not tasks:
+    #         raise TaskNotFoundException
+    #     return [TaskSchema.model_validate(task) for task in tasks]

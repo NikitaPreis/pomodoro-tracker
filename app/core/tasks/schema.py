@@ -23,4 +23,10 @@ class TaskCreateSchema(BaseModel):
     name: str | None = None
     pomodoro_count: int | None = None
     category_id: int
-    # user_id: int
+
+
+class TaskUpdateSchema(BaseModel):
+    name: str
+    pomodoro_count: int
+    status: str
+    category_id: int
