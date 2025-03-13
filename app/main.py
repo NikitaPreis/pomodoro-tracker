@@ -14,6 +14,7 @@ from app.infrastructure.database.accessor import get_db_session, init_models
 from app.core.tasks.handlers import router as tasks_router
 from app.users.auth.handlers import router as auth_router
 from app.users.user_profile.handlers import router as user_router
+from app.users.user_settings.handlers import router as user_settings_router
 
 
 async def ampq_con(attempts_to_connection: int = 3):
@@ -68,3 +69,4 @@ app.include_router(tasks_router)
 app.include_router(category_router)
 app.include_router(auth_router)
 app.include_router(user_router)
+app.include_router(user_settings_router)

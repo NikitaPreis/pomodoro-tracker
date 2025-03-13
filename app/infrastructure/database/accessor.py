@@ -24,5 +24,6 @@ async def get_db_session() -> AsyncSession:
 
 
 async def init_models():
+    from app.users.user_settings.models import UserSettings
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

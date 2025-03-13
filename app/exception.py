@@ -6,6 +6,14 @@ class UserNotCorrectPasswordException(Exception):
     detail = 'User not correct password'
 
 
+class UserSettingsNotFoundException(Exception):
+    detail = 'User settings not found'
+
+
+class UserSettingsCreatingException(Exception):
+    detail = 'User settings not created'
+
+
 class TokenExpired(Exception):
     detail = 'Token has expired'
 

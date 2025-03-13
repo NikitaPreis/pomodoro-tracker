@@ -39,9 +39,7 @@ class CategoryRepository:
             Category.name == category_name, Category.user_id == user_id
         )
         async with self.db_session as session:
-            category = (await session.execute(
-                query
-            )).scalar_one_or_none()
+            category = (await session.execute(query)).scalar_one_or_none()
         return category
 
     async def create_category(

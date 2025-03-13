@@ -3,8 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.categories.models import Category
 from app.core.tasks.models import Task
-from app.core.tasks.schema import TaskCreateSchema
-
+from app.core.tasks.schema import TaskCreateSchema, TaskUpdateSchema
+from app.core.tasks.utils import TaskFilter
 
 class TaskRepository:
 
@@ -18,6 +18,16 @@ class TaskRepository:
                 query
             )).scalars().all()
         return tasks
+
+    async def get_filtered_tasks(
+        self, user_id, task_filter: TaskFilter,
+    ):
+        query = task_filter.filter(
+            select(Task).where(Task.user_id == user_id).outerjoin(Category)
+        )
+        async with self.db_session as session:
+            tasks = (await session.execute(query)).scalars().all() 
+            return tasks
 
     async def get_task(self, task_id: int) -> Task | None:
         query = select(Task).where(Task.id == task_id)
@@ -47,6 +57,22 @@ class TaskRepository:
             await session.commit()
             return task_id
 
+    async def update_task(
+        self, task_id: int, user_id: int, task: TaskUpdateSchema
+    ) -> Task:
+        stmt = update(Task).where(
+            Task.id == task_id, Task.user_id == user_id
+        ).values(
+            name=task.name,
+            pomodoro_count=task.pomodoro_count,
+            status=task.status,
+            category_id=task.category_id,
+        ).returning(Task.id)
+        async with self.db_session as session:
+            task_id = (await session.execute(stmt)).scalar_one()
+            await session.commit()
+            return await self.get_task(task_id=task_id)
+
     async def delete_task(self, task_id: int, user_id: int) -> None:
         query = delete(Task).where(
             Task.id == task_id, Task.user_id == user_id
@@ -62,7 +88,6 @@ class TaskRepository:
             Category, Task.category_id == Category.id
         ).where(
             Category.name == category_name,
-            # Category.user_id == user_id,
             Task.user_id == Task.user_id
         )
         async with self.db_session as session:

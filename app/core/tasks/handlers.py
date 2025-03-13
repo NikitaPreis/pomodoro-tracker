@@ -1,13 +1,15 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi_filter import FilterDepends
 
 from app.exception import (TaskNotFoundException, UserNotFoundException,
                            CategoryNotFoundException, TaskStatusNotCorrect)
 from app.dependecy import get_task_service, get_request_user_id
-from app.core.tasks.repository import TaskRepository, TaskCache
 from app.core.tasks.service import TaskService
-from app.core.tasks.schema import TaskSchema, TaskCreateSchema
+from app.core.tasks.schema import (TaskSchema, TaskCreateSchema,
+                                   TaskUpdateSchema)
+from app.core.tasks.utils import TaskFilter
 
 
 router = APIRouter(
@@ -22,30 +24,16 @@ router = APIRouter(
 )
 async def get_tasks(
     task_service: Annotated[TaskService, Depends(get_task_service)],
+    task_filter: TaskFilter = FilterDepends(TaskFilter),
     user_id: int = Depends(get_request_user_id),
-):
-    tasks = await task_service.get_tasks(user_id=user_id)
-    return tasks
-
-
-# union with base handler get_tasks
-@router.get(
-    '/get-by-category',
-    response_model=list[TaskSchema],
-    status_code=status.HTTP_200_OK
-)
-async def get_tasks_by_category(
-    category_name: str,
-    task_serice: Annotated[TaskService, Depends(get_task_service)],
-    user_id: int = Depends(get_request_user_id)
-) -> TaskSchema:
+) -> list[TaskSchema]:
     try:
-        return await task_serice.get_tasks_by_category(
-            user_id=user_id, category_name=category_name
+        return await task_service.get_filtered_tasks(
+            user_id=user_id, task_filter=task_filter
         )
     except TaskNotFoundException as e:
         raise HTTPException(
-            status_code=status.HTTP_201_CREATED,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=e.detail
         )
 
@@ -88,21 +76,20 @@ async def create_task(
     return task
 
 
-@router.patch(
+@router.put(
     '/{task_id}',
     response_model=TaskSchema,
     status_code=status.HTTP_201_CREATED
 )
-async def update_task_name(
-    task_id: int, name: str,
+async def update_task(
+    task_id: int, body: TaskUpdateSchema,
     task_serice: Annotated[TaskService, Depends(get_task_service)],
     user_id:int = Depends(get_request_user_id)
 ) -> TaskSchema:
     try:
-        task = await task_serice.update_task_name(
-           task_id=task_id, name=name, user_id=user_id
+        return await task_serice.update_task(
+           task_id=task_id, user_id=user_id, task=body
         )
-        return task
     except TaskNotFoundException as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -127,6 +114,32 @@ async def delete_task(
     try:
         return await task_service.delete_task(
             task_id=task_id, user_id=user_id
+        )
+    except TaskNotFoundException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.detail
+        )
+    except UserNotFoundException as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=e.detail
+        )
+
+
+@router.patch(
+    '/{task_id}/set-name',
+    response_model=TaskSchema,
+    status_code=status.HTTP_201_CREATED
+)
+async def update_task_name(
+    task_id: int, name: str,
+    task_serice: Annotated[TaskService, Depends(get_task_service)],
+    user_id:int = Depends(get_request_user_id)
+) -> TaskSchema:
+    try:
+        return await task_serice.update_task_name(
+           task_id=task_id, name=name, user_id=user_id
         )
     except TaskNotFoundException as e:
         raise HTTPException(
@@ -180,13 +193,13 @@ async def update_task_status(
         return await task_service.update_task_status(
             user_id=user_id, task_id=task_id, task_status=task_status
         )
-    except TaskNotFoundException as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=e.detail
-        )
     except TaskStatusNotCorrect as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
+            detail=e.detail
+        )
+    except TaskNotFoundException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=e.detail
         )
