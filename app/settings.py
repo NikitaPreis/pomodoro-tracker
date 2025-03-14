@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     # Test and enviroment.
-    TESTING: str = 'True'
+    TESTING: str = 'False'
     ENV_FILE: str = '.env'
 
     # PostgreSQL DB credentials.
